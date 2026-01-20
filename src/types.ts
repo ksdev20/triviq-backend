@@ -28,7 +28,7 @@ export interface ClientToServerEvents {
   join_room: { roomId: RoomID; name: string };
   leave_room: { roomId: RoomID };
   start_question: { roomId: RoomID; questionId: string };
-  submit_question: { roomId: RoomID; questionId: string; answerIndex: number };
+  submit_answer: { roomId: RoomID; questionId: string; answerIndex: number };
   heartbeat: void;
 }
 
@@ -41,7 +41,7 @@ export interface ServerToClientEvents {
     question: Omit<Question, "correctIndex">;
     endsAt: number;
   };
-  scores_update: { roomId: RoomID; players: Player[] };
+  scores_updated: { roomId: RoomID; players: Player[] };
   error: { code: string; message: string };
 }
 
