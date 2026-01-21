@@ -19,34 +19,43 @@ export interface Question {
 export interface RoomState {
   id: RoomID;
   players: Map<PlayerID, Player>;
-  currentQuestion?: Question;
-  questionEndsAt?: number;
+  currentQuestion?: Question | undefined;
+  questionEndsAt?: number | undefined;
   isActive: boolean;
 }
 
 export interface ClientToServerEvents {
-  join_room: { roomId: RoomID; name: string };
-  leave_room: { roomId: RoomID };
-  start_question: { roomId: RoomID; questionId: string };
-  submit_answer: { roomId: RoomID; questionId: string; answerIndex: number };
-  heartbeat: void;
+  join_room: (payload: { roomId: RoomID; name: string }) => void;
+  leave_room: (payload: { roomId: RoomID }) => void;
+  start_question: (payload: { roomId: RoomID; questionId: string }) => void;
+  submit_answer: (payload: {
+    roomId: RoomID;
+    questionId: string;
+    answerIndex: number;
+  }) => void;
+  heartbeat: () => void;
+  error: (payload: { code: string; message?: string }) => void;
 }
 
 export interface ServerToClientEvents {
-  room_state: { roomId: RoomID; players: Player[]; isActive: boolean };
-  player_joined: { roomId: RoomID; player: Player };
-  player_left: { roomId: RoomID; player: Player };
-  question_start: {
+  room_state: (payload: {
+    roomId: RoomID;
+    players: Player[];
+    isActive: boolean;
+  }) => void;
+  player_joined: (payload: { roomId: RoomID; player: Player }) => void;
+  player_left: (payload: { roomId: RoomID; player?: Player | undefined, playerId: PlayerID }) => void;
+  question_start: (payload: {
     roomId: RoomID;
     question: Omit<Question, "correctIndex">;
     endsAt: number;
-  };
-  scores_updated: { roomId: RoomID; players: Player[] };
-  error: { code: string; message: string };
+  }) => void;
+  scores_updated: (payload: { roomId: RoomID; players: Player[]; correctIndex: number }) => void;
+  error: (payload: { code: string; message?: string }) => void;
 }
 
 export interface InterServerEvents {}
 export interface SocketData {
-  playerID?: PlayerID;
-  roomID?: RoomID;
+  playerId: PlayerID;
+  roomId?: RoomID;
 }
