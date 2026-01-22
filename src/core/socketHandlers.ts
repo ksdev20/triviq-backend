@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import { Server, Socket } from "socket.io";
 import type {
   ClientToServerEvents,
@@ -41,6 +42,20 @@ export function registerSocketHandlers(
     CONFIG.rateLimit.windowMs,
     CONFIG.rateLimit.maxEvents,
   );
+
+  io.use((socket, next) => {
+    const token = socket.handshake.auth?.token || (socket.handshake.headers["authorization"] as string | undefined)?.replace(/^Bearer\s+/i, "");
+    if (!token) return next(new Error("Missing auth token"));
+
+    try {
+      const decoded = jwt.verify(token, CONFIG.jwtSecret) as { playerID: string; name?: string};
+      socket.data.playerId = decoded.playerID;
+      socket.data.name = decoded.name;
+      next();
+    } catch (e) {
+      next(new Error("Invalid or expired token"));
+    }
+  })
 
   io.on("connection", (socket: SocketType) => {
     const key = socket.handshake.address || socket.id;
