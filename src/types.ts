@@ -34,7 +34,7 @@ export interface ClientToServerEvents {
     answerIndex: number;
   }) => void;
   heartbeat: () => void;
-  error: (payload: { code: string; message?: string }) => void;
+  // error: (payload: { code: string; message?: string }) => void;
 }
 
 export interface ServerToClientEvents {

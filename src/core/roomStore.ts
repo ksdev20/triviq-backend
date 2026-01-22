@@ -1,6 +1,7 @@
 import type { Player, PlayerID, RoomID, RoomState } from "../types.js";
 import { CONFIG } from "../config.js";
 
+//basically RoomStore is like a in-server(local) state db, it doesn't handle timing, it just 'stores'
 export class RoomStore {
   private rooms = new Map<RoomID, RoomState>();
 
@@ -8,6 +9,7 @@ export class RoomStore {
     return this.rooms.get(roomId);
   }
 
+  //gets room safely, if room doesn't exist, creates a new one
   ensure(roomId: RoomID): RoomState {
     let room = this.get(roomId);
     if (!room) {
@@ -19,7 +21,7 @@ export class RoomStore {
 
   addPlayer(roomId: RoomID, player: Player): Player | Error {
     const room = this.ensure(roomId);
-    if (room.players.size >= CONFIG.maxPlayersPerRoom) {
+    if (room.players.size >= CONFIG.maxPlayersPerRoom) { //refuse to add on room size limit reach
       return new Error("Room_Full");
     }
     room.players.set(player.id, player);
@@ -32,7 +34,7 @@ export class RoomStore {
     const player = room.players.get(playerId);
     if (!player) return;
     room.players.delete(playerId);
-    if (room.players.size == 0) {
+    if (room.players.size == 0) { //clean the room if it has 0 players
       this.rooms.delete(roomId);
     }
     return player;
@@ -66,6 +68,6 @@ export class RoomStore {
 
   listPlayers(roomId: RoomID): Player[] {
     const room = this.get(roomId);
-    return room ? Array.from(room.players.values()) : [];
-  }
+    return room ? Array.from(room.players.values()) : []; // had to use Array.from() because Map.values() returns MapIterator and not array of values
+   }
 }
